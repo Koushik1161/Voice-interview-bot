@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Koushik</title>
+    <style>
+        /*
+         * Designed with the philosophy:
+         * "Simplicity isn't just a visual style.
+         *  It involves digging through the depth of complexity."
+         * — Jony Ive
+         */
+
+        @property --angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+            --c1: rgba(120, 119, 198, 0.8);
+            --c2: rgba(168, 85, 247, 0.7);
+            --c3: rgba(236, 72, 153, 0.6);
+            --c4: rgba(59, 130, 246, 0.5);
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: var(--font);
+            background: #000;
+            color: #fff;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ═══════════════════════════════════════
+           LAYOUT
+        ═══════════════════════════════════════ */
+        .layout {
+            position: fixed;
+            inset: 0;
+            display: grid;
+            grid-template-rows: 1fr auto;
+            grid-template-columns: 1fr;
+        }
+
+        /* ═══════════════════════════════════════
+           MAIN - Center content
+        ═══════════════════════════════════════ */
+        .main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        /* ═══════════════════════════════════════
+           THE ORB
+        ═══════════════════════════════════════ */
+        .orb-wrapper {
+            position: relative;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .orb {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            position: relative;
+            background:
+                radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4) 0%, transparent 40%),
+                radial-gradient(circle at 70% 80%, rgba(168, 85, 247, 0.8) 0%, transparent 50%),
+                radial-gradient(circle at 20% 70%, rgba(120, 119, 198, 0.9) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.7) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.6) 0%, transparent 70%),
+                linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            box-shadow:
+                inset 0 0 50px rgba(255,255,255,0.1),
+                inset 0 0 80px rgba(120, 119, 198, 0.3),
+                0 0 60px rgba(168, 85, 247, 0.4),
+                0 0 100px rgba(120, 119, 198, 0.2);
+            animation: breathe 4s ease-in-out infinite, orbRotate 20s linear infinite;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.6s ease;
+        }
+
+        .orb::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background:
+                conic-gradient(from var(--angle) at 50% 50%,
+                    rgba(120, 119, 198, 0.8) 0deg,
+                    rgba(168, 85, 247, 0.6) 60deg,
+                    rgba(236, 72, 153, 0.7) 120deg,
+                    rgba(59, 130, 246, 0.5) 180deg,
+                    rgba(168, 85, 247, 0.6) 240deg,
+                    rgba(120, 119, 198, 0.8) 300deg,
+                    rgba(120, 119, 198, 0.8) 360deg
+                );
+            filter: blur(12px);
+            opacity: 0.8;
+            animation: rotate 8s linear infinite;
+        }
+
+        .orb::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 25% 25%, rgba(255,255,255,0.5) 0%, transparent 40%),
+                radial-gradient(circle at 75% 75%, rgba(0,0,0,0.2) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+        .glow {
+            position: absolute;
+            inset: -80%;
+            border-radius: 50%;
+            background: radial-gradient(circle,
+                rgba(168, 85, 247, 0.3) 0%,
+                rgba(120, 119, 198, 0.2) 30%,
+                rgba(236, 72, 153, 0.1) 50%,
+                transparent 70%);
+            filter: blur(60px);
+            opacity: 0.7;
+            transition: opacity 0.8s ease;
+            pointer-events: none;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        @keyframes orbRotate {
+            0% {
+                background-position: 0% 50%, 100% 100%, 0% 100%, 100% 0%, 50% 50%, 0% 0%;
+            }
+            50% {
+                background-position: 100% 50%, 0% 0%, 100% 0%, 0% 100%, 50% 50%, 100% 100%;
+            }
+            100% {
+                background-position: 0% 50%, 100% 100%, 0% 100%, 100% 0%, 50% 50%, 0% 0%;
+            }
+        }
+
+        @keyframes rotate {
+            to { --angle: 360deg; }
+        }
+
+        .orb-wrapper:hover .orb {
+            transform: scale(1.08);
+            box-shadow:
+                inset 0 0 50px rgba(255,255,255,0.15),
+                inset 0 0 80px rgba(120, 119, 198, 0.4),
+                0 0 80px rgba(168, 85, 247, 0.5),
+                0 0 120px rgba(120, 119, 198, 0.3);
+        }
+        .orb-wrapper:hover .glow { opacity: 1; }
+
+        .orb-wrapper.active .orb {
+            animation: breathe 2s ease-in-out infinite, orbRotate 10s linear infinite, pulse 1.5s ease-in-out infinite;
+            box-shadow:
+                inset 0 0 50px rgba(255,255,255,0.2),
+                inset 0 0 80px rgba(120, 119, 198, 0.5),
+                0 0 80px rgba(168, 85, 247, 0.6),
+                0 0 140px rgba(120, 119, 198, 0.4);
+        }
+        .orb-wrapper.active .glow { opacity: 1; }
+
+        .orb-wrapper.speaking .orb {
+            animation: breathe 0.8s ease-in-out infinite, orbRotate 5s linear infinite, speak 0.25s ease-in-out infinite;
+            box-shadow:
+                inset 0 0 60px rgba(255,255,255,0.25),
+                inset 0 0 100px rgba(120, 119, 198, 0.6),
+                0 0 100px rgba(168, 85, 247, 0.7),
+                0 0 160px rgba(236, 72, 153, 0.4);
+        }
+
+        @keyframes pulse {
+            0%, 100% { filter: brightness(1) saturate(1); }
+            50% { filter: brightness(1.15) saturate(1.1); }
+        }
+
+        @keyframes speak {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* ═══════════════════════════════════════
+           IDENTITY
+        ═══════════════════════════════════════ */
+        .identity {
+            margin-top: 40px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(8px);
+            animation: fadeIn 1.2s ease 0.3s forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .name {
+            font-size: 28px;
+            font-weight: 300;
+            letter-spacing: -0.5px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 13px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.35);
+            transition: color 0.5s ease;
+        }
+
+        .status.active {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* ═══════════════════════════════════════
+           TRANSCRIPT - Side panel
+        ═══════════════════════════════════════ */
+        .transcript {
+            position: fixed;
+            top: 50%;
+            right: 32px;
+            transform: translateY(-50%);
+            width: 320px;
+            max-height: 60vh;
+            overflow-y: auto;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+
+        .transcript.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .transcript::-webkit-scrollbar {
+            width: 0;
+        }
+
+        .message {
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            animation: messageIn 0.5s ease;
+        }
+
+        .message:last-child {
+            border-bottom: none;
+        }
+
+        @keyframes messageIn {
+            from { opacity: 0; transform: translateX(12px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .message-role {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.3);
+            margin-bottom: 6px;
+        }
+
+        .message-text {
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1.55;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* ═══════════════════════════════════════
+           QUESTIONS - Bottom bar
+        ═══════════════════════════════════════ */
+        .questions {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            opacity: 0;
+            transform: translateY(8px);
+            animation: fadeIn 1.2s ease 0.6s forwards;
+        }
+
+        .questions.hidden {
+            opacity: 0 !important;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .questions-label {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        .questions-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .question {
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-family: var(--font);
+            font-size: 13px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .question:hover {
+            border-color: rgba(255, 255, 255, 0.25);
+            color: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .question:active {
+            transform: scale(0.97);
+        }
+
+        /* ═══════════════════════════════════════
+           LOADING
+        ═══════════════════════════════════════ */
+        .loading {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 1;
+            transition: opacity 1s ease;
+        }
+
+        .loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-dot {
+            width: 6px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            animation: loadingPulse 1.4s ease-in-out infinite;
+        }
+
+        @keyframes loadingPulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* ═══════════════════════════════════════
+           TOAST
+        ═══════════════════════════════════════ */
+        .toast {
+            position: fixed;
+            top: 32px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            font-size: 13px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.6);
+            opacity: 0;
+            transition: all 0.4s ease;
+            pointer-events: none;
+        }
+
+        .toast.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ═══════════════════════════════════════
+           RESPONSIVE
+        ═══════════════════════════════════════ */
+        @media (max-width: 900px) {
+            .transcript {
+                position: fixed;
+                top: 24px;
+                left: 24px;
+                right: 24px;
+                bottom: auto;
+                transform: none;
+                width: auto;
+                max-height: 30vh;
+            }
+
+            .message {
+                padding: 12px 0;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .orb {
+                width: 140px;
+                height: 140px;
+            }
+
+            .name {
+                font-size: 24px;
+            }
+
+            .identity {
+                margin-top: 32px;
+            }
+
+            .questions {
+                padding: 20px 16px;
+                gap: 12px;
+            }
+
+            .question {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+
+            .transcript {
+                top: 16px;
+                left: 16px;
+                right: 16px;
+                max-height: 25vh;
+            }
+
+            .message-text {
+                font-size: 13px;
+            }
+        }
+
+        @media (min-height: 900px) and (min-width: 900px) {
+            .orb {
+                width: 220px;
+                height: 220px;
+            }
+
+            .name {
+                font-size: 32px;
+            }
+
+            .identity {
+                margin-top: 48px;
+            }
+        }
+
+        /* ═══════════════════════════════════════
+           REDUCED MOTION
+        ═══════════════════════════════════════ */
+        @media (prefers-reduced-motion: reduce) {
+            .orb, .orb::before {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading -->
+    <div class="loading" id="loading">
+        <div class="loading-dot"></div>
+    </div>
+
+    <!-- Layout -->
+    <div class="layout">
+        <!-- Main -->
+        <main class="main">
+            <!-- The Orb -->
+            <div class="orb-wrapper" id="orbWrapper" role="button" tabindex="0" aria-label="Start voice conversation">
+                <div class="glow"></div>
+                <div class="orb"></div>
+            </div>
+
+            <!-- Identity -->
+            <div class="identity">
+                <h1 class="name">Koushik</h1>
+                <p class="status" id="status">Tap to connect</p>
+            </div>
+        </main>
+
+        <!-- Questions -->
+        <nav class="questions" id="questions">
+            <span class="questions-label">Ask about</span>
+            <div class="questions-list">
+                <button class="question" data-prompt="Tell me about yourself">Background</button>
+                <button class="question" data-prompt="What is your greatest strength?">Strengths</button>
+                <button class="question" data-prompt="What are your growth areas?">Growth</button>
+                <button class="question" data-prompt="What do people misunderstand about you?">Misconceptions</button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Transcript -->
+    <aside class="transcript" id="transcript"></aside>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script src="voice.js"></script>
+</body>
+</html>
