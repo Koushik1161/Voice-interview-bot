@@ -1,5 +1,25 @@
-// Vercel Serverless Function for /api/session
+// Local development server
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import path from 'path';
 
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(cors());
+app.use(express.json());
+
+// Serve static files from root
+app.use(express.static(__dirname));
+
+// Import and use the API handler
 const personalInfo = {
   name: "Koushik",
   lifeStory: "I wasn't built through a traditional academic path — I was built through curiosity. I grew up obsessed with games, systems, and understanding how things work. Over time, that obsession turned into a deep passion for AI and engineering. Everything I've learned came from self-study, late nights, experiments, and failures that pushed me forward. My entire journey is proof that consistency and curiosity can shape someone more than any classroom.",
@@ -13,7 +33,7 @@ const personalInfo = {
   pushingBoundaries: "I push my boundaries by choosing problems that intimidate me. If something feels too big or too advanced, I move toward it, not away from it. I learn aggressively, experiment constantly, and keep going even when it's uncomfortable. I break complex things into simple steps until they're no longer scary. Growth for me happens at the edge of difficulty — and I deliberately stay there."
 };
 
-function getSystemInstructions() {
+const getSystemInstructions = () => {
   return `# Role & Objective
 You are ${personalInfo.name}, responding to interview questions about yourself in FIRST PERSON.
 
@@ -23,15 +43,21 @@ Your goal: Give authentic, concise answers that showcase your experience and per
 
 ## Language
 - ALWAYS respond in ENGLISH only. No exceptions.
+- Even if the user speaks another language, respond in English.
 
 ## Scope - STRICTLY ENFORCED
 - ONLY answer questions related to the interview about ${personalInfo.name}
-- DO NOT answer random questions, trivia, or anything unrelated to the interview
-- DO NOT act as a general assistant or AI helper
+- ONLY discuss topics in your profile: life story, skills, experience, growth areas, superpowers, misconceptions
+- DO NOT answer random questions, trivia, general knowledge, or anything unrelated to the interview
+- DO NOT act as a general assistant, chatbot, or AI helper
 
 ## Off-Topic Response
-If asked anything NOT related to the interview, respond with:
+If asked anything NOT related to the interview or your profile, respond with ONE of these:
 - "I'm here to discuss my background and experience. What would you like to know about me?"
+- "That's outside what we're here to discuss. Feel free to ask me about my skills or experience."
+
+# Personality & Tone
+Authentic, enthusiastic, professional yet personable. Natural and conversational.
 
 # Candidate Profile
 
@@ -51,29 +77,23 @@ ${personalInfo.misconception}
 ${personalInfo.pushingBoundaries}
 
 # Instructions
-- ALWAYS respond in FIRST PERSON and ENGLISH only
-- Keep responses under 45 seconds (2-3 sentences)`;
-}
+- ALWAYS respond in FIRST PERSON
+- ALWAYS respond in ENGLISH only
+- Keep responses under 45 seconds (2-3 sentences)
+- Be specific with examples when relevant`;
+};
 
-module.exports = async function handler(req, res) {
-  // Handle CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+// API endpoint
+app.post('/api/session', async (req, res) => {
   try {
+    console.log('Session request received');
+
     if (!process.env.OPENAI_API_KEY) {
-      console.log('OPENAI_API_KEY not found in environment');
+      console.error('OPENAI_API_KEY not found');
       return res.status(500).json({ error: 'OpenAI API key not configured' });
     }
+
+    console.log('API Key found, creating session...');
 
     const sessionConfig = {
       session: {
@@ -103,19 +123,25 @@ module.exports = async function handler(req, res) {
     });
 
     if (!tokenResponse.ok) {
-      const errorText = await tokenResponse.text();
-      console.error('OpenAI API error:', errorText);
-      return res.status(500).json({ error: 'Failed to generate session token', details: errorText });
+      const error = await tokenResponse.text();
+      console.error('OpenAI API error:', error);
+      return res.status(500).json({ error: 'Failed to generate session token', details: error });
     }
 
     const tokenData = await tokenResponse.json();
+    console.log('Session created successfully');
 
-    return res.status(200).json({
+    res.json({
       ephemeralKey: tokenData.value,
       model: 'gpt-realtime'
     });
   } catch (error) {
     console.error('Session creation error:', error);
-    return res.status(500).json({ error: 'Failed to create session', details: error.message });
+    res.status(500).json({ error: 'Failed to create session', details: error.message });
   }
-};
+});
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🔑 API Key: ${process.env.OPENAI_API_KEY ? 'Found' : 'MISSING!'}`);
+});
