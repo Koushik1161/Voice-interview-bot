@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+// Note: express.static doesn't work on Vercel - public/ is served automatically
 
 // Personalized interview data - CUSTOMIZE THIS WITH YOUR INFO
 const personalInfo = {
@@ -200,3 +200,6 @@ app.listen(PORT, () => {
   console.log(`🚀 Interview Voice Bot Server running on http://localhost:${PORT}`);
   console.log(`📝 Make sure to set your OPENAI_API_KEY in .env file`);
 });
+
+// Export for Vercel serverless
+export default app;
